@@ -1,223 +1,187 @@
-GoalSave API 💰
+# Betechified GoalSave Capstone Project 💰
+
 **Improving Saving Habits Through a Simple Digital Budget and Savings Tracker**
 
-A secure RESTful API built with Node.js, Express, and MongoDB. GoalSave helps users budget, track income/expenses, set savings goals, and get financial insights without the complexity.
+A secure, scalable RESTful API built with Node.js, Express, and MongoDB.
 
-**Live API**: `https://goalsave-api.onrender.com`  
-**Status**: Capstone Project - MVP
+GoalSave helps students, young professionals, and low-to-middle-income earners build better financial habits.
+
+**Repo**: `Betechified GoalSave Capstone project` :  `jiggy04/Goalsave-api` & `kayodeakanni/Goalsave-api`
+**Live API**: `https://goalsave-api.onrender.com`
 
 ---
 
-Features
+### Features
 - **User Authentication**: Secure signup/login with `bcryptjs` + JWT
-- **Protected Routes**: `requireAuth` middleware for all financial data
+- **Wallet System**: Track multiple wallets and balances
 - **Budget Management**: Create weekly/monthly budgets by category
-- **Income & Expense Tracking**: Log transactions with auto categorization
+- **Income & Expense Tracking**: Log transactions with categories
 - **Savings Goals**: Create goals, track progress, add contributions
-- **Spending Analytics**: Charts data by category and monthly trends
-- **Financial Reports**: Weekly and monthly summaries
-- **Smart Notifications**: Endpoints to support reminders for budgets/bills/savings
-- **Robust Validation**: Joi validation on all inputs
-- **Error Handling**: Centralized middleware for MongoDB and route errors
-- **Ownership Verification**: Users can only access/modify their own data
+- **Dashboard & Reports**: Analytics, spending trends, weekly/monthly reports
+- **Category Management**: Custom income/expense categories
+- **Validation**: Joi validation per module in `src/validators/`
+- **Error Handling**: Centralized middleware + custom `AppError` class
+- **Ownership Verification**: Users can only access their own data
+- **Pagination & Querying**: Built-in filtering, sorting, and pagination
 
-Tech Stack
+### Tech Stack
 | Layer | Technology |
 | --- | --- |
-| Runtime | Node.js + Express |
+| Runtime | Node.js 18+ + Express |
 | Database | MongoDB Atlas + Mongoose |
 | Auth | JWT, bcryptjs |
 | Validation | Joi |
-| Config | dotenv |
+| Architecture | MVC + Service Layer |
 | Hosting | Render.com |
 
-Project Structure
-goalsave-api/
-├── middleware/
-│   ├── http://auth.js
-│   ├── http://errorHandler.js
-│   ├── http://logger.js
-│   └── http://validate.js
-├── models/
-│   ├── http://user.model.js
-│   ├── http://budget.model.js
-│   ├── http://transaction.model.js
-│   └── http://savingsGoal.model.js
-├── routes/
-│   ├── http://auth.routes.js
-│   ├── http://budget.routes.js
-│   ├── http://transaction.routes.js
-│   └── http://goal.routes.js
-├── controllers/
-│   ├── http://auth.controller.js
-│   ├── http://budget.controller.js
-│   ├── http://transaction.controller.js
-│   └── http://goal.controller.js
-├── .env
+### Project Structure
+Goalsave-api/
+├── src/
+│   ├── config/
+│   │   ├── http://connectDatabase.js
+│   │   └── http://validateEnv.js
+│   ├── controllers/
+│   │   ├── http://auth.controller.js
+│   │   ├── http://budget.controller.js
+│   │   ├── http://category.controller.js
+│   │   ├── http://dashboard.controller.js
+│   │   ├── http://report.controller.js
+│   │   ├── http://savings.controller.js
+│   │   ├── http://transaction.controller.js
+│   │   └── http://wallet.controller.js
+│   ├── middleware/
+│   │   ├── http://auth.middleware.js
+│   │   ├── http://error.middleware.js
+│   │   ├── http://notFound.middleware.js
+│   │   └── http://validate.middleware.js
+│   ├── models/
+│   │   ├── http://Budget.js
+│   │   ├── http://Category.js
+│   │   ├── http://SavingsGoal.js
+│   │   ├── http://Transaction.js
+│   │   ├── http://User.js
+│   │   └── http://Wallet.js
+│   ├── routes/
+│   │   ├── http://auth.routes.js
+│   │   ├── http://budget.routes.js
+│   │   ├── http://category.routes.js
+│   │   ├── http://dashboard.routes.js
+│   │   ├── http://report.routes.js
+│   │   ├── http://savings.routes.js
+│   │   ├── http://transaction.routes.js
+│   │   ├── http://wallet.routes.js
+│   │   └── http://index.js
+│   ├── services/
+│   │   ├── http://auth.service.js
+│   │   ├── http://budget.service.js
+│   │   ├── http://category.service.js
+│   │   ├── http://dashboard.service.js
+│   │   ├── http://report.service.js
+│   │   ├── http://savings.service.js
+│   │   ├── http://transaction.service.js
+│   │   └── http://wallet.service.js
+│   ├── utils/
+│   │   ├── http://ApiResponse.js
+│   │   ├── http://AppError.js
+│   │   ├── http://asyncHandler.js
+│   │   ├── http://bcrypt.js
+│   │   ├── http://jwt.js
+│   │   ├── http://pagination.js
+│   │   ├── http://queryFeatures.js
+│   │   └── http://userResponse.js
+│   ├── validators/
+│   │   ├── http://auth.validator.js
+│   │   ├── http://budget.validator.js
+│   │   ├── http://category.validator.js
+│   │   ├── http://savings.validator.js
+│   │   ├── http://transaction.validator.js
+│   │   └── http://wallet.validator.js
+│   ├── http://app.js
+│   └── http://server.js
+├── .env.example
 ├── .gitignore
 ├── http://package.json
-└── http://server.js
+├── http://package-lock.json
+└── http://README.md
 
-Data Models
+### Data Models
+#### User, Wallet, Budget, Transaction, SavingsGoal, Category
+See `/src/models/` for full schemas. All models are scoped to `user` for ownership verification.
 
-1. User
-```js
-{
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true, lowercase: true },
-  password: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
-}
-2. Budget
-{
-  user: { type: ObjectId, ref: 'User', required: true },
-  type: { type: String, enum: ['weekly', 'monthly'], required: true },
-  period: { type: String, required: true }, // "2026-07" for monthly
-  totalIncome: { type: Number, default: 0 },
-  categories: [{
-    name: String, // "Food", "Rent", "Transport"
-    allocated: Number
-  }],
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-}
-3. Transaction
-{
-  user: { type: ObjectId, ref: 'User', required: true },
-  type: { type: String, enum: ['income', 'expense'], required: true },
-  amount: { type: Number, required: true },
-  category: { type: String, required: true },
-  description: { type: String },
-  date: { type: Date, default: Date.now }
-}
-4. SavingsGoal
-{
-  user: { type: ObjectId, ref: 'User', required: true },
-  title: { type: String, required: true }, // "Emergency Fund"
-  targetAmount: { type: Number, required: true },
-  currentAmount: { type: Number, default: 0 },
-  deadline: { type: Date },
-  contributions: [{ amount: Number, date: Date }],
-  status: { type: String, enum: ['active', 'completed'], default: 'active' },
-  createdAt: { type: Date, default: Date.now }
-}
-Text index added on `transaction.category` + `transaction.description` for search.
+### API Endpoints
 
-API Documentation
+#### Auth
+`POST /api/auth/register` - Register  
+`POST /api/auth/login` - Login, returns JWT
 
-Auth Routes
-Method	Endpoint	Description
-POST	`/api/auth/register`	Register new user
-POST	`/api/auth/login`	Login and receive JWT
-Budget Routes - Protected
-Method	Endpoint	Description
-POST	`/api/budgets`	Create new budget
-GET	`/api/budgets`	Get all budgets for logged-in user
-GET	`/api/budgets/:id`	Get single budget
-PUT	`/api/budgets/:id`	Update budget
-DELETE	`/api/budgets/:id`	Delete budget
-Transaction Routes - Protected
-Method	Endpoint	Description
-POST	`/api/transactions`	Log income or expense
-GET	`/api/transactions`	Get all transactions. Query: `?type=expense&category=Food&month=2026-07&search=groceries`
-GET	`/api/transactions/analytics`	Get spending by category + monthly trend
-PUT	`/api/transactions/:id`	Update transaction
-DELETE	`/api/transactions/:id`	Delete transaction
-Savings Goal Routes - Protected
-Method	Endpoint	Description
-POST	`/api/goals`	Create savings goal
-GET	`/api/goals`	Get all goals with progress %
-GET	`/api/goals/:id`	Get single goal
-PUT	`/api/goals/:id/contribute`	Add money to goal
-DELETE	`/api/goals/:id`	Delete goal
-Example Requests
+#### Wallet
+`POST /api/wallet` - Create wallet  
+`GET /api/wallet` - Get all user wallets  
 
-*1. Register*
-POST /api/auth/register
-Content-Type: application/json
+#### Budget
+`POST /api/budget` - Create budget  
+`GET /api/budget` - Get budgets `?type=monthly&period=2026-07`  
 
-{
-  "name": "David Okoro",
-  "email": "david@mail.com",
-  "password": "securePass123"
-}
-*2. Create Budget*
-POST /api/budgets
-Authorization: Bearer <token>
-{
-  "type": "monthly",
-  "period": "2026-07",
-  "totalIncome": 250000,
-  "categories": [
-    {"name": "Food", "allocated": 60000},
-    {"name": "Transport", "allocated": 25000},
-    {"name": "Savings", "allocated": 50000}
-  ]
-}
-*3. Log Expense*
-POST /api/transactions
-Authorization: Bearer <token>
-{
-  "type": "expense",
-  "amount": 3500,
-  "category": "Food",
-  "description": "Lunch"
-}
-*4. Get Analytics*
-GET /api/transactions/analytics?month=2026-07
-Authorization: Bearer <token>
-*5. Contribute to Goal*
-PUT /api/goals/64f1a2b3c4d5e6f7g8h9i0j/contribute
-Authorization: Bearer <token>
-{
-  "amount": 20000
-}
-Validation - Joi
-All POST/PUT routes validated with Joi:
-- `email`: valid email
-- `password`: min 6 characters
-- `amount`: number > 0
-- `type`: "income" or "expense"
-- `category`: required string
+#### Category
+`POST /api/category` - Create custom category  
+`GET /api/category?type=expense` - Get categories
 
-Error Handling
-Standardized JSON responses:
-{
-  "success": false,
-  "message": "Not authorized"
-}
-Status Codes used: `200, 201, 400, 401, 403, 404, 500`
+#### Transaction
+`POST /api/transaction` - Log income/expense  
+`GET /api/transaction` - Get transactions with pagination/filtering  
+`GET /api/transaction?search=groceries&page=1&limit=10`
 
-Setup & Run Locally
-*1. Install dependencies*
-git clone <repo-url>
-cd goalsave-api
+#### Savings Goals
+`POST /api/savings` - Create goal  
+`PUT /api/savings/:id/contribute` - Add contribution  
+`GET /api/savings` - Get all goals with progress %
+
+#### Dashboard & Reports
+`GET /api/dashboard` - Overview: income, expenses, savings  
+`GET /api/report/monthly?month=2026-07` - Monthly report  
+`GET /api/report/analytics` - Spending by category
+
+All protected routes require: `Authorization: Bearer <token>`
+
+### Validation
+Each module has Joi validation in `/src/validators/`.  
+Validation is applied globally via `validate.middleware.js`
+
+### Setup & Installation
+
+**1. Clone & Install**
+```bash
+git clone <your-repo-url>
+cd Goalsave-api
 npm install
-*2. Create .env*
-PORT=5000
-MONGO_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/goalsave
-JWT_SECRET=supersecretkey123
+*2. Environment Variables*  
+Copy `.env.example` to `.env` and fill in:
+PORT=3000
+MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/goalsave
+JWT_SECRET=your_jwt_secret
 NODE_ENV=development
-*3. Start server*
+*3. Run Server*
 npm run dev
-Server runs on `http://localhost:5000`
+Server runs on `http://localhost:3000`
 
-Deployment
+### Deployment to Render
 1. Push to GitHub
-2. Deploy to http://Render.com as Web Service
-3. Add Environment Variables: `MONGO_URI`, `JWT_SECRET`
-4. Build Command: `npm install` | Start Command: `npm start`
+2. Create Web Service on http://Render.com
+3. Build Command: `npm install`
+4. Start Command: `npm start`
+5. Add Environment Variables from `.env.example`
 
-Methodology
-Agile development: Discovery → Design → Development → Testing → Deployment.  
-User interviews done with students and young professionals to keep the API simple.
-
-Success Metrics
+### Success Metrics
 Metric	Target
 User registration rate	5,000 users in 6 months
 Weekly active users	60% of registered users
 Budget completion rate	75%
 Savings goal completion	50%
 90-day retention	50%
-Conclusion
-GoalSave makes budgeting and saving approachable. By focusing on core features and clean data, the API empowers users to take control of their finances and build long-term habits.
+
+### Contributors
+Capstone Team - Betechified
+  
+---
+Built for Betechified GoalSave Capstone 2026
+
