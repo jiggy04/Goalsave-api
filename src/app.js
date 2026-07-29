@@ -26,7 +26,9 @@ app.get("/", (req, res) => {
     res.status(200).json({
         success: true,
         message: "GoalSave API is running",
-        version: "v1"
+        version: "1.0.0",
+        documentation: "/api/v1",
+        status: "Online"
     });
 });
 
