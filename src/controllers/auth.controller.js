@@ -7,8 +7,8 @@ const asyncHandler = require("../utils/asyncHandler");
 const userResponse = require("../utils/userResponse");
 
 
-const register = asyncHandler(async (req, res) => {
-    const result = await authService.register(req.body);
+const signup = asyncHandler(async (req, res) => {
+    const result = await authService.signup(req.body);
 
     return ApiResponse.success(
         res,
@@ -37,7 +37,7 @@ const getProfile = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-    register,
+    signup,
     login,
     getProfile
 };

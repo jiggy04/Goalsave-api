@@ -8,7 +8,7 @@ const userResponse = require("../utils/userResponse");
 /**
  * Register User
  */
-const register = async (payload) => {
+const signup = async (payload) => {
 
     const {
         firstName,
@@ -212,7 +212,7 @@ const changePassword = async (
 };
 
 module.exports = {
-    register,
+    signup,
     login,
     getProfile,
     updateProfile,

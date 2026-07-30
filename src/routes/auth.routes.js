@@ -9,16 +9,16 @@ const ApiResponse = require("../utils/ApiResponse");
 const userResponse = require("../utils/userResponse");
 
 const {
-    registerSchema,
+    signupSchema,
     loginSchema
 } = require("../validators/auth.validator");
 
 const router = express.Router();
 
 router.post(
-    "/register",
-    validate(registerSchema),
-    authController.register
+    "/signup",
+    validate(signupSchema),
+    authController.signup
 );
 
 router.post(
