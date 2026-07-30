@@ -8,7 +8,7 @@ const userResponse = (user) => ({
 
     email: user.email,
 
-    avatar: user.avatar,
+    image: user.image,
 
     currency: user.currency,
 

@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema(
             select: false
         },
 
-        avatar: {
+        image: {
             publicId: {
                 type: String,
                 default: ""
