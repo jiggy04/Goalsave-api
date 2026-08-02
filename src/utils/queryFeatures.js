@@ -1,22 +1,37 @@
-const getQueryFeatures = (query) => {
+const getQueryFeatures = (query = {}) => {
 
     const page =
-        Number(query.page) || 1;
+        Math.max(Number(query.page) || 1, 1);
 
     const limit =
-        Number(query.limit) || 10;
+        Math.max(Number(query.limit) || 10, 1);
 
     const skip =
         (page - 1) * limit;
 
-    const sort =
-        query.sort || "-createdAt";
+    const sortField =
+        query.sort || "createdAt";
+
+    const order =
+        query.order === "asc"
+            ? 1
+            : -1;
+
+    const sort = {
+        [sortField]: order
+    };
+
+    const search =
+        query.search
+            ? query.search.trim()
+            : "";
 
     return {
         page,
         limit,
         skip,
-        sort
+        sort,
+        search
     };
 
 };

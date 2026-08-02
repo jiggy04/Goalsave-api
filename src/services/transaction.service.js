@@ -4,9 +4,15 @@ const Transaction = require("../models/Transaction");
 const Wallet = require("../models/Wallet");
 const Category = require("../models/Category");
 const SavingsGoal = require("../models/SavingsGoal");
-
+const notificationService = require("./notification.service");
 const AppError = require("../utils/AppError");
 const getQueryFeatures = require("../utils/queryFeatures");
+const {
+    checkBudgetThreshold
+} = require("./budgetNotification.service");
+const {
+    createNotification
+} = require("./notification.service");
 
 /**
  * Update Wallet Balance
@@ -185,9 +191,38 @@ const createTransaction = async (
             { session }
         );
 
+        if (payload.type === "Expense") {
+
+            await checkBudgetThreshold(
+                userId,
+                payload.category
+            );
+
+        }
+
         await session.commitTransaction();
 
-        return transaction[0];
+        if (payload.type === "Expense") {
+
+        await checkBudgetThreshold(
+
+            userId,
+
+            payload.category
+
+        );
+
+    }
+
+    await checkLargeTransaction(
+
+        transaction[0],
+
+        wallet.name
+
+    );
+
+    return transaction[0];
 
     } catch (error) {
 
@@ -210,6 +245,14 @@ const getTransactions = async (
     userId,
     query = {}
 ) => {
+    const {
+        page,
+        limit,
+        skip,
+        sort,
+        search
+    } = getQueryFeatures(query);
+
 
     const filter = {
         user: userId
@@ -225,6 +268,18 @@ const getTransactions = async (
 
     if (query.type) {
         filter.type = query.type;
+    }
+
+    if (search) {
+
+        filter.description = {
+
+            $regex: search,
+
+            $options: "i"
+
+        };
+
     }
 
     if (query.startDate || query.endDate) {
@@ -245,19 +300,28 @@ const getTransactions = async (
 
     }
 
-    const {
-        limit,
-        skip,
-        sort
-    } = getQueryFeatures(query);
 
-    return await Transaction.find(filter)
+
+    const total = await Transaction.countDocuments(filter);
+
+    const transactions = await Transaction.find(filter)
         .populate("wallet", "name")
         .populate("category", "name type color icon")
         .populate("savingsGoal", "title")
         .sort(sort)
         .skip(skip)
-        .limit(limit);
+        .limit(limit)
+        .lean();
+
+    return {
+        items: transactions,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit)
+        }
+    };
 
 };
 
@@ -575,10 +639,49 @@ const deleteTransaction = async (
 
 };
 
+const checkLargeTransaction = async (
+    transaction,
+    walletName
+) => {
+
+    const LARGE_TRANSACTION_LIMIT =
+    Number(process.env.LARGE_TRANSACTION_LIMIT) || 100000;
+
+    if (
+        transaction.type !== "Expense" ||
+        transaction.amount < LARGE_TRANSACTION_LIMIT
+    ) {
+
+        return;
+
+    }
+
+    await createNotification({
+
+        user: transaction.user,
+
+        title: "Large Expense Detected",
+
+        message:
+            `A large expense of ₦${transaction.amount.toLocaleString()} was recorded from your ${walletName} wallet.`,
+
+        type: "transaction",
+
+        priority: "high",
+
+        relatedModel: "Transaction",
+
+        relatedId: transaction._id
+
+    });
+
+};
+
 module.exports = {
     createTransaction,
     getTransactions,
     getTransactionById,
     updateTransaction,
-    deleteTransaction
+    deleteTransaction,
+    checkLargeTransaction
 };

@@ -22,13 +22,16 @@ const createBudget = asyncHandler(async (req, res) => {
 const getBudgets = asyncHandler(async (req, res) => {
 
     const budgets = await budgetService.getBudgets(
-        req.user._id
+        req.user._id,
+        req.query
     );
 
     return ApiResponse.success(
         res,
         "Budgets retrieved successfully",
-        budgets
+        budgets.items,
+        200,
+        budgets.pagination
     );
 
 });

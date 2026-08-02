@@ -45,6 +45,16 @@ const budgetSchema = new mongoose.Schema(
         isActive: {
             type: Boolean,
             default: true
+        },
+
+        warningSent: {
+            type: Boolean,
+            default: false
+}       ,
+
+        exceededNotificationSent: {
+            type: Boolean,
+            default: false
         }
     },
     {

@@ -1,7 +1,7 @@
 const Budget = require("../models/Budget");
 const Category = require("../models/Category");
 const Transaction = require("../models/Transaction");
-
+const notificationService = require("./notification.service");
 const AppError = require("../utils/AppError");
 const getQueryFeatures = require("../utils/queryFeatures");
 
@@ -71,6 +71,11 @@ const calculateBudgetStats = async (budget) => {
 
     }
 
+    await notificationService.createBudgetAlert(
+        budget,
+        percentageUsed
+    );
+
     return {
         ...budget.toObject(),
         spent,
@@ -137,28 +142,32 @@ const createBudget = async (
  */
 const getBudgets = async (
     userId,
-    query
+    query = {}
 ) => {
+
+    const {
+        page,
+        limit,
+        skip,
+        sort,
+        search
+    } = getQueryFeatures(query);
 
     const filter = {
         user: userId,
         isActive: true
     };
 
-    if (query.search) {
+    if (search) {
 
         filter.title = {
-            $regex: query.search,
+            $regex: search,
             $options: "i"
         };
 
     }
 
-    const {
-        limit,
-        skip,
-        sort
-    } = getQueryFeatures(query);
+    const total = await Budget.countDocuments(filter);
 
     const budgets = await Budget.find(filter)
         .populate(
@@ -181,7 +190,15 @@ const getBudgets = async (
 
     }
 
-    return response;
+    return {
+        items: response,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit)
+        }
+    };
 
 };
 
@@ -270,17 +287,33 @@ const updateBudget = async (
     }
 
     if (payload.amount) {
+
         budget.amount = payload.amount;
+
+        budget.warningSent = false;
+
+        budget.exceededNotificationSent = false;
+
     }
 
     if (payload.startDate) {
-        budget.startDate =
-            payload.startDate;
+
+        budget.startDate = payload.startDate;
+
+        budget.warningSent = false;
+
+        budget.exceededNotificationSent = false;
+
     }
 
     if (payload.endDate) {
-        budget.endDate =
-            payload.endDate;
+
+        budget.endDate = payload.endDate;
+
+        budget.warningSent = false;
+
+        budget.exceededNotificationSent = false;
+
     }
 
     await budget.save();

@@ -40,7 +40,9 @@ const getTransactions = asyncHandler(
         return ApiResponse.success(
             res,
             "Transactions retrieved successfully",
-            transactions
+            transactions.items,
+            200,
+            transactions.pagination
         );
 
     }

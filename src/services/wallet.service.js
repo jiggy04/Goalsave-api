@@ -50,33 +50,50 @@ const createWallet = async (payload, userId) => {
 };
 
 const getWallets = async (userId, query ={}) => {
+    
+    const {
+        page,
+        limit,
+        skip,
+        sort, 
+        search
+    } = getQueryFeatures(query);
 
     const filter = {
         user: userId,
         isActive: true
     };
-
-    query = query || {};
-
-    if (query.search) {
+    
+    if (search) {
 
         filter.name = {
-            $regex: query.search,
+
+            $regex: search,
+
             $options: "i"
+
         };
 
     }
 
-    const {
-        limit,
-        skip,
-        sort
-    } = getQueryFeatures(query);
 
-    return await Wallet.find(filter)
+    const total = await Wallet.countDocuments(filter);
+
+    const wallets = await Wallet.find(filter)
         .sort(sort)
         .skip(skip)
-        .limit(limit);
+        .limit(limit)
+        .lean();
+
+    return {
+        items: wallets,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit)
+        }
+    };
 
 };
 

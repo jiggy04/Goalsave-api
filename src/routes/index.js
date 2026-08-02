@@ -8,6 +8,8 @@ const budgetRoutes = require("./budget.routes");
 const savingsRoutes = require("./savings.routes");
 const dashboardRoutes = require("./dashboard.routes");
 const reportRoutes = require("./report.routes");
+const userRoutes = require("./user.routes");
+const notificationRoutes = require("./notification.routes");
 
 const router = express.Router();
 
@@ -21,11 +23,13 @@ router.get("/", (req, res) => {
 });
 
 router.use("/auth", authRoutes);
+router.use("/users", userRoutes);
 router.use("/wallets", walletRoutes);
 router.use("/categories", categoryRoutes);
 router.use("/transactions", transactionRoutes);
 router.use("/budgets", budgetRoutes);
 router.use("/savings", savingsRoutes);
+router.use("/notifications", notificationRoutes);
 router.use("/dashboard", dashboardRoutes);
 router.use("/reports", reportRoutes);
 

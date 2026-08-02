@@ -1,12 +1,17 @@
 const SavingsGoal = require("../models/SavingsGoal");
+const {
+    createNotification
+} = require("./notification.service");
 
 const AppError = require("../utils/AppError");
 const getQueryFeatures = require("../utils/queryFeatures");
+
 
 /**
  * Create Savings Goal
  */
 const createGoal = async (payload, userId) => {
+
     if (!payload || !payload.title || !payload.targetAmount) {
 
         throw new AppError(
@@ -17,13 +22,41 @@ const createGoal = async (payload, userId) => {
     }
 
     const goal = await SavingsGoal.create({
+
         user: userId,
+
         title: payload.title,
+
         targetAmount: payload.targetAmount,
+
         currentAmount: 0,
+
         targetDate: payload.targetDate,
+
         description: payload.description
+
     });
+
+
+    // Create notification
+    await createNotification({
+
+        user: userId,
+
+        title: "Savings Goal Created",
+
+        message: `Your savings goal "${goal.title}" has been created successfully.`,
+
+        type: "savings",
+
+        priority: "low",
+
+        relatedModel: "SavingsGoal",
+
+        relatedId: goal._id
+
+    });
+
 
     return goal;
 
@@ -142,6 +175,8 @@ const updateGoal = async (
         );
     }
 
+    const wasCompleted = goal.isCompleted
+
     if (payload.title) {
         goal.title = payload.title;
     }
@@ -200,6 +235,8 @@ const contributeToGoal = async (
         );
     }
 
+    const wasCompleted = goal.isCompleted;
+
     goal.currentAmount += amount;
 
 if (goal.currentAmount > goal.targetAmount) {
@@ -210,6 +247,28 @@ goal.isCompleted =
     goal.currentAmount >= goal.targetAmount;
 
     await goal.save();
+
+    if (!wasCompleted && goal.isCompleted) {
+
+        await createNotification({
+
+            user: userId,
+
+            title: "Savings Goal Achieved",
+
+            message: `Congratulations! You have achieved your "${goal.title}" savings goal.`,
+
+            type: "savings",
+
+            priority: "high",
+
+            relatedModel: "SavingsGoal",
+
+            relatedId: goal._id
+
+        });
+
+    }
 
     return goal;
 

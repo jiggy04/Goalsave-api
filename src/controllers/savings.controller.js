@@ -3,6 +3,10 @@ const savingsService = require("../services/savings.service");
 const ApiResponse = require("../utils/ApiResponse");
 const asyncHandler = require("../utils/asyncHandler");
 
+const {
+    createNotification
+} = require("../services/notification.service");
+
 /**
  * Create Savings Goal
  */

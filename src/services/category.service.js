@@ -41,6 +41,14 @@ const createCategory = async (payload, userId) => {
 
 const getCategories = async (userId, query = {}) => {
 
+    const {
+        page,
+        limit,
+        skip,
+        sort,
+        search
+    } = getQueryFeatures(query);
+
     const filter = {
         user: userId,
         isActive: true
@@ -50,23 +58,32 @@ const getCategories = async (userId, query = {}) => {
         filter.type = query.type;
     }
 
-    if (query.search) {
+    if (search) {
         filter.name = {
-            $regex: query.search,
+            $regex: search,
             $options: "i"
         };
     }
 
-    const {
-        limit,
-        skip,
-        sort
-    } = getQueryFeatures(query);
 
-    return await Category.find(filter)
+    const total = await Category.countDocuments(filter);
+
+    const categories = await Category.find(filter)
         .sort(sort)
         .skip(skip)
-        .limit(limit);
+        .limit(limit)
+        .lean();
+
+    return {
+        items: categories,
+        pagination: {
+             page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit)
+        }
+    };
+
 
 };
 

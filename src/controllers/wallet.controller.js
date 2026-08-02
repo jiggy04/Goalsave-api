@@ -23,7 +23,9 @@ const getWallets = asyncHandler(async (req, res) => {
     return ApiResponse.success(
         res,
         "Wallets retrieved successfully",
-        wallets
+        wallets.items,
+        200,
+        wallets.pagination
     );
 });
 

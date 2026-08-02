@@ -35,7 +35,9 @@ const getCategories = asyncHandler(async (req, res) => {
     return ApiResponse.success(
         res,
         "Categories retrieved successfully",
-        categories
+        categories.items,
+        200,
+        categories.pagination
     );
 
 });

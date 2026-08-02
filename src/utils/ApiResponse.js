@@ -4,7 +4,8 @@ class ApiResponse {
         res,
         message,
         data = null,
-        statusCode = 200
+        statusCode = 200,
+        meta = null
     ) {
 
         return res.status(statusCode).json({
@@ -12,6 +13,7 @@ class ApiResponse {
             success: true,
             message,
             data,
+            meta,
             errors: null
 
         });
