@@ -251,7 +251,7 @@ const getTransactions = async (
         skip,
         sort,
         search
-    } = getQueryFeatures(query);
+} = getQueryFeatures(query);
 
 
     const filter = {
